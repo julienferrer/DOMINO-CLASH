@@ -1,0 +1,120 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Domino Clash - Édition Dessin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;600;700&family=Gochi+Hand&display=swap" rel="stylesheet">
+    <style>
+      body {
+        margin: 0;
+        font-family: 'Inter', sans-serif;
+        background-color: #f0f0f0;
+        color: #1a1a1a;
+        overflow-x: hidden;
+      }
+      .font-sketch { font-family: 'Gochi Hand', cursive; }
+      
+      /* Fond papier à carreaux */
+      .paper-grid {
+        background-color: #ffffff;
+        background-image: 
+          linear-gradient(90deg, rgba(0, 150, 255, 0.1) 1px, transparent 1px),
+          linear-gradient(rgba(0, 150, 255, 0.1) 1px, transparent 1px);
+        background-size: 20px 20px;
+        position: relative;
+      }
+
+      /* Ligne rouge supprimée comme demandé */
+
+      .no-red-line::before {
+        display: none !important;
+      }
+
+      .tile-placed-animation {
+        animation: tilePop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+
+      @keyframes tilePop {
+        0% { transform: scale(0.5) rotate(-10deg); opacity: 0; }
+        70% { transform: scale(1.1) rotate(2deg); opacity: 1; }
+        100% { transform: scale(1) rotate(0deg); opacity: 1; }
+      }
+
+      .pulse-draw {
+        animation: pulseDraw 1.5s infinite;
+      }
+
+      @keyframes pulseDraw {
+        0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+        70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(59, 130, 246, 0); }
+        100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+      }
+
+      .tile-dance {
+        animation: dance 0.8s ease-in-out infinite, highlight 1.2s ease-in-out infinite alternate;
+        border-color: #fcd34d !important;
+        z-index: 30;
+      }
+
+      @keyframes dance {
+        0%, 100% { transform: scale(1.05) rotate(0deg); }
+        25% { transform: scale(1.05) rotate(-2deg); }
+        75% { transform: scale(1.05) rotate(2deg); }
+      }
+
+      @keyframes highlight {
+        from { box-shadow: 0 0 8px 1px rgba(252, 211, 77, 0.3); }
+        to { box-shadow: 0 0 22px 8px rgba(252, 211, 77, 0.6); }
+      }
+
+      .score-pop {
+        animation: scorePop 1.5s ease-out forwards;
+      }
+
+      @keyframes scorePop {
+        0% { transform: scale(0) translateY(0); opacity: 0; }
+        30% { transform: scale(1.8) translateY(-30px); opacity: 1; }
+        100% { transform: scale(1) translateY(-60px); opacity: 0; }
+      }
+
+      .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+      }
+
+      #board-container {
+        transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+      }
+
+      /* Opponent Styles */
+      .uwu-style .dot { background-color: #f472b6 !important; }
+      .uwu-style { border-color: #fbcfe8 !important; border-radius: 8px !important; }
+
+      .bomba-style .dot { background-color: #ea580c !important; border-radius: 1px !important; transform: rotate(5deg) scale(1.1); }
+      .bomba-style { border-color: #fdba74 !important; border-style: solid !important; border-width: 3px !important; transform: skewX(-2deg); }
+
+      .claat-style .dot { background-color: #7c3aed !important; box-shadow: 0 0 4px #a78bfa; }
+      .claat-style { border-color: #4c1d95 !important; background-color: #f5f3ff !important; }
+      
+      .tile-base {
+        transition: transform 0.4s ease-out;
+      }
+    </style>
+    <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@^19.2.3",
+        "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+        "react/": "https://esm.sh/react@^19.2.3/",
+        "@google/genai": "https://esm.sh/@google/genai@^1.34.0"
+      }
+    }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
