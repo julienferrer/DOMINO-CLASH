@@ -292,7 +292,6 @@ const App: React.FC = () => {
     if (!gameState || gameState.board.length === 0) return 1;
     const tileWidth = 66; 
     const totalWidth = gameState.board.length * tileWidth;
-    // Sur mobile, on utilise toute la largeur. Sur PC, on soustrait la largeur du chat (450px environ).
     const chatWidth = window.innerWidth >= 768 ? 450 : 0;
     const availableWidth = (window.innerWidth - chatWidth) * 0.95; 
     if (totalWidth < availableWidth) return 1;
@@ -301,20 +300,26 @@ const App: React.FC = () => {
 
   if (!difficulty || !selectedTargetScore) {
     return (
-      <div className="min-h-screen paper-grid flex flex-col items-center justify-start md:justify-center p-6 md:p-12 overflow-y-auto relative scrollbar-hide">
-        <div className="z-10 text-center flex flex-col items-center w-full max-w-6xl py-8">
-          <h1 className="text-5xl md:text-8xl font-sketch text-blue-600 mb-2 transform -rotate-2">DOMINO CLASH</h1>
-          <p className="text-lg md:text-2xl font-sketch text-gray-400 mb-12 italic">"Le duel sur papier blanc."</p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10 w-full mb-12">
+      <div className="min-h-screen paper-grid flex flex-col items-center justify-start md:justify-center p-4 md:p-12 overflow-y-auto relative scrollbar-hide">
+        <div className="z-10 text-center flex flex-col items-center w-full max-w-6xl py-4 md:py-8">
+          <h1 className="text-4xl md:text-8xl font-sketch text-blue-600 mb-1 transform -rotate-2">DOMINO CLASH</h1>
+          <p className="text-base md:text-2xl font-sketch text-gray-400 mb-6 md:mb-12 italic">"Le duel sur papier blanc."</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-10 w-full mb-8">
             {(Object.values(CHARACTERS) as Character[]).map((char) => (
               <div 
                 key={char.difficulty} 
-                className="group bg-white border-4 border-dashed border-gray-100 rounded-3xl p-6 flex flex-col items-center transition-all duration-300 hover:rotate-1 cursor-pointer shadow-lg hover:shadow-2xl active:scale-95" 
+                className={`group bg-white border-4 border-dashed rounded-3xl p-4 md:p-6 flex flex-col items-center transition-all duration-300 hover:rotate-1 cursor-pointer shadow-lg hover:shadow-2xl active:scale-95 ${char.difficulty === Difficulty.HARD ? 'border-purple-200' : 'border-gray-100'}`} 
                 onClick={() => setDifficulty(char.difficulty)}
               >
-                <img src={char.avatar} alt={char.name} className="w-28 h-28 md:w-40 md:h-40 rounded-full mb-4 object-cover border-4 border-white shadow-md transform group-hover:scale-110 transition-transform" />
-                <h2 className={`text-3xl md:text-4xl font-sketch ${char.nameColor}`}>{char.name}</h2>
-                <p className="font-sketch text-gray-400 mt-2 text-lg">{char.description}</p>
+                <div className="relative">
+                  <img src={char.avatar} alt={char.name} className="w-24 h-24 md:w-40 md:h-40 rounded-full mb-3 md:mb-4 object-cover border-4 border-white shadow-md transform group-hover:scale-110 transition-transform" />
+                  {char.difficulty === Difficulty.HARD && <div className="absolute -top-2 -right-2 bg-purple-600 text-white text-[10px] font-bold px-2 py-1 rounded-full animate-pulse uppercase tracking-tighter">BOSS</div>}
+                </div>
+                <h2 className={`text-2xl md:text-4xl font-sketch ${char.nameColor}`}>{char.name}</h2>
+                <p className="font-sketch text-gray-400 mt-1 md:mt-2 text-base md:text-lg text-center leading-tight">{char.description}</p>
+                <span className={`mt-2 text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded border ${char.difficulty === Difficulty.HARD ? 'border-purple-200 text-purple-400' : 'border-gray-200 text-gray-300'}`}>
+                  {char.difficulty}
+                </span>
               </div>
             ))}
           </div>
@@ -351,7 +356,6 @@ const App: React.FC = () => {
           <p className="whitespace-nowrap"><span className={character.nameColor}>{character.name}</span>: <span className="font-bold text-orange-500">{gameState?.aiScore}</span></p>
           <p className="text-gray-300 hidden md:block">/ {gameState?.targetScore}</p>
         </div>
-        {/* Bouton Chat Mobile */}
         <button 
           onClick={() => setIsMobileChatOpen(!isMobileChatOpen)}
           className="md:hidden w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center shadow-lg active:scale-90 transition-transform"
@@ -362,7 +366,6 @@ const App: React.FC = () => {
 
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative">
         <div className="flex-1 relative flex flex-col overflow-hidden">
-          {/* Main de l'IA */}
           <div className="pt-2 md:pt-4 pb-1 md:pb-2 flex justify-center gap-1">
             {gameState?.aiHand.map((tile, i) => (
               <DominoTile 
@@ -466,7 +469,6 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        {/* Chat - Sidebar sur PC, Overlay sur Mobile */}
         <div className={`
           ${isMobileChatOpen ? 'flex' : 'hidden md:flex'}
           fixed md:relative inset-0 md:inset-auto w-full md:w-96 glass-chat flex flex-col z-[100] md:z-50 shadow-xl
