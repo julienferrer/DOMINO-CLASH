@@ -17,6 +17,8 @@ const App: React.FC = () => {
   const [showEndReview, setShowEndReview] = useState(false);
   const [roundPoints, setRoundPoints] = useState<{player: number, ai: number} | null>(null);
   const [pendingPlacement, setPendingPlacement] = useState<{tile: Tile, index: number} | null>(null);
+  const [aiAnimatingTile, setAiAnimatingTile] = useState<{tile: Tile, position: 'start' | 'end'} | null>(null);
+  
   const chatEndRef = useRef<HTMLDivElement>(null);
   const boardRef = useRef<HTMLDivElement>(null);
 
@@ -64,6 +66,7 @@ const App: React.FC = () => {
     setSelectedTargetScore(target);
     setShowEndReview(false);
     setRoundPoints(null);
+    setAiAnimatingTile(null);
     setStartingTile(starterInfo.startingTile);
     setGameState({
       playerHand,
@@ -140,6 +143,7 @@ const App: React.FC = () => {
     const starterInfo = findStartingInfo(playerHand, aiHand, character.name);
     setShowEndReview(false);
     setRoundPoints(null);
+    setAiAnimatingTile(null);
     setStartingTile(starterInfo.startingTile);
     setGameState(prev => prev ? ({
       ...prev,
@@ -193,16 +197,34 @@ const App: React.FC = () => {
 
   const executeAIMove = useCallback(() => {
     if (!gameState || gameState.currentPlayer !== 'ai' || gameState.isGameOver || showEndReview) return;
+    
     setTimeout(() => {
       setGameState(prev => {
         if (!prev || prev.currentPlayer !== 'ai' || prev.isGameOver || showEndReview) return prev;
+        
+        // Cas particulier du premier tour si l'IA commence
         if (prev.board.length === 0 && startingTile) {
           const newHand = [...prev.aiHand];
           const idx = newHand.findIndex(t => (t[0] === startingTile[0] && t[1] === startingTile[1]) || (t[0] === startingTile[1] && t[1] === startingTile[0]));
           if (idx === -1) return prev;
-          newHand.splice(idx, 1);
-          return { ...prev, aiHand: newHand, board: [startingTile], currentPlayer: 'player', actions: addAction(prev.actions, `${character?.name} lance la partie.`) };
+          
+          const tileToPlay = newHand[idx];
+          // Animation de l'IA
+          setAiAnimatingTile({ tile: tileToPlay, position: 'start' });
+          
+          setTimeout(() => {
+            setAiAnimatingTile(null);
+            setGameState(st => {
+              if (!st) return null;
+              const h = [...st.aiHand];
+              const i = h.findIndex(t => (t[0] === tileToPlay[0] && t[1] === tileToPlay[1]) || (t[0] === tileToPlay[1] && t[1] === tileToPlay[0]));
+              h.splice(i, 1);
+              return { ...st, aiHand: h, board: [startingTile], currentPlayer: 'player', actions: addAction(st.actions, `${character?.name} lance la partie.`) };
+            });
+          }, 600);
+          return prev; 
         }
+
         let currentHand = [...prev.aiHand];
         let currentBoneyard = [...prev.boneyard];
         let drew = false;
@@ -216,24 +238,47 @@ const App: React.FC = () => {
         }
 
         if (move) {
-          const newBoard = [...prev.board];
-          const newHand = [...currentHand];
-          const tileIdx = newHand.findIndex(t => t[0] === move.tile[0] && t[1] === move.tile[1]);
-          newHand.splice(tileIdx, 1);
-          let placedTile = [...move.tile] as Tile;
-          if (move.position === 'start') {
-            if (newBoard.length > 0 && placedTile[1] !== newBoard[0][0]) placedTile = [placedTile[1], placedTile[0]];
-            newBoard.unshift(placedTile);
-          } else {
-            if (newBoard.length > 0 && placedTile[0] !== newBoard[newBoard.length - 1][1]) placedTile = [placedTile[1], placedTile[0]];
-            newBoard.push(placedTile);
-          }
-          const message = drew ? `${character?.name} a pioché puis joué.` : `${character?.name} a joué son coup.`;
-          if (newHand.length === 0) {
-            setTimeout(() => endRound('ai'), 300);
-            return { ...prev, aiHand: newHand, board: newBoard, boneyard: currentBoneyard, currentPlayer: 'player', actions: addAction(prev.actions, `${character?.name} finit sa main !`) };
-          }
-          return { ...prev, aiHand: newHand, board: newBoard, boneyard: currentBoneyard, currentPlayer: 'player', actions: addAction(prev.actions, message) };
+          const tileToAnimate = move.tile;
+          const posToAnimate = move.position;
+          const wasDrew = drew;
+          const finalBoneyard = currentBoneyard;
+          
+          // Lancer l'animation
+          setAiAnimatingTile({ tile: tileToAnimate, position: posToAnimate });
+
+          setTimeout(() => {
+            setAiAnimatingTile(null);
+            setGameState(st => {
+              if (!st) return null;
+              const newBoard = [...st.board];
+              const newHand = [...st.aiHand];
+              // Si on a pioché entre temps dans le state local de executeAIMove, on doit mettre à jour la main
+              // Mais ici on simplifie en appliquant le résultat calculé
+              const tileIdx = newHand.findIndex(t => t[0] === tileToAnimate[0] && t[1] === tileToAnimate[1]);
+              
+              // Gestion sécurisée si pioché
+              let effectiveHand = drew ? currentHand : newHand;
+              const effectiveIdx = effectiveHand.findIndex(t => t[0] === tileToAnimate[0] && t[1] === tileToAnimate[1]);
+              effectiveHand.splice(effectiveIdx, 1);
+
+              let placedTile = [...tileToAnimate] as Tile;
+              if (posToAnimate === 'start') {
+                if (newBoard.length > 0 && placedTile[1] !== newBoard[0][0]) placedTile = [placedTile[1], placedTile[0]];
+                newBoard.unshift(placedTile);
+              } else {
+                if (newBoard.length > 0 && placedTile[0] !== newBoard[newBoard.length - 1][1]) placedTile = [placedTile[1], placedTile[0]];
+                newBoard.push(placedTile);
+              }
+
+              const message = wasDrew ? `${character?.name} a pioché puis joué.` : `${character?.name} a joué son coup.`;
+              if (effectiveHand.length === 0) {
+                setTimeout(() => endRound('ai'), 300);
+                return { ...st, aiHand: effectiveHand, board: newBoard, boneyard: finalBoneyard, currentPlayer: 'player', actions: addAction(st.actions, `${character?.name} finit sa main !`) };
+              }
+              return { ...st, aiHand: effectiveHand, board: newBoard, boneyard: finalBoneyard, currentPlayer: 'player', actions: addAction(st.actions, message) };
+            });
+          }, 600);
+          return prev;
         } else {
           const playerMoves = getValidMoves(prev.playerHand, prev.board);
           if (playerMoves.length === 0) {
@@ -304,7 +349,7 @@ const App: React.FC = () => {
 
       <div className="flex-1 flex overflow-hidden">
         <div className="flex-1 relative flex flex-col overflow-hidden">
-          {/* Main de l'IA - Révélée à la fin du round */}
+          {/* Main de l'IA face cachée - TOTALEMENT OPAQUE */}
           <div className="pt-4 pb-2 flex justify-center gap-1">
             {gameState?.aiHand.map((tile, i) => (
               <DominoTile 
@@ -321,9 +366,21 @@ const App: React.FC = () => {
           <div className="flex-1 flex items-center justify-center overflow-hidden">
             <div 
               id="board-container" 
-              className="flex flex-nowrap items-center justify-center gap-0 min-w-max"
+              className="flex flex-nowrap items-center justify-center gap-0 min-w-max relative"
               style={{ transform: `scale(${boardScale})` }}
             >
+              {/* Animation du domino de l'IA qui arrive */}
+              {aiAnimatingTile && (
+                <div className={`absolute ${aiAnimatingTile.position === 'start' ? '-left-20' : '-right-20'} top-0 ai-play-anim`}>
+                  <DominoTile 
+                    tile={aiAnimatingTile.tile} 
+                    vertical={aiAnimatingTile.tile[0] === aiAnimatingTile.tile[1]} 
+                    themeClass={character.tileStyle}
+                    className="border-2 border-blue-400 shadow-xl"
+                  />
+                </div>
+              )}
+
               {gameState?.board.map((tile, i) => (
                 <DominoTile 
                   key={`${i}-${tile[0]}-${tile[1]}`} 
@@ -362,7 +419,6 @@ const App: React.FC = () => {
                     )
                  )}
               </div>
-              {/* Le Narrateur : Design Tableau Noir (noir avec texte blanc) */}
               <div className="text-right flex flex-col items-end min-h-[110px] min-w-[300px] bg-[#1a1a1a] p-4 rounded-xl border-4 border-gray-400 shadow-inner relative">
                  <div className="absolute top-1 left-4 flex gap-1">
                     <div className="w-1.5 h-1.5 bg-gray-500 rounded-full"></div>
@@ -378,7 +434,6 @@ const App: React.FC = () => {
                  </div>
               </div>
             </div>
-            {/* Ajout de pt-6 pour éviter que l'animation tile-dance ne coupe les dominos en haut */}
             <div className="flex justify-center gap-2 overflow-x-auto pt-6 pb-6 scrollbar-hide">
               {gameState?.playerHand.map((tile, i) => {
                 let playable = getPossiblePlacements(tile, gameState.board).length > 0;
