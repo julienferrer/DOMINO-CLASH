@@ -301,28 +301,39 @@ const App: React.FC = () => {
 
   if (!difficulty || !selectedTargetScore) {
     return (
-      <div className="min-h-screen paper-grid flex flex-col items-center justify-center p-6 overflow-y-auto relative">
-        <div className="z-10 text-center flex flex-col items-center">
+      <div className="min-h-screen paper-grid flex flex-col items-center justify-start md:justify-center p-6 md:p-12 overflow-y-auto relative scrollbar-hide">
+        <div className="z-10 text-center flex flex-col items-center w-full max-w-6xl py-8">
           <h1 className="text-5xl md:text-8xl font-sketch text-blue-600 mb-2 transform -rotate-2">DOMINO CLASH</h1>
-          <p className="text-lg md:text-2xl font-sketch text-gray-400 mb-8 italic">"Le duel sur papier blanc."</p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 w-full max-w-6xl">
+          <p className="text-lg md:text-2xl font-sketch text-gray-400 mb-12 italic">"Le duel sur papier blanc."</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10 w-full mb-12">
             {(Object.values(CHARACTERS) as Character[]).map((char) => (
-              <div key={char.difficulty} className="group bg-white border-4 border-dashed border-gray-100 rounded-3xl p-4 md:p-6 flex flex-col items-center transition-all duration-300 hover:rotate-1 cursor-pointer shadow-lg hover:shadow-2xl" onClick={() => setDifficulty(char.difficulty)}>
-                <img src={char.avatar} alt={char.name} className="w-24 h-24 md:w-40 md:h-40 rounded-full mb-4 object-cover border-4 border-white shadow-md transform group-hover:scale-110 transition-transform" />
+              <div 
+                key={char.difficulty} 
+                className="group bg-white border-4 border-dashed border-gray-100 rounded-3xl p-6 flex flex-col items-center transition-all duration-300 hover:rotate-1 cursor-pointer shadow-lg hover:shadow-2xl active:scale-95" 
+                onClick={() => setDifficulty(char.difficulty)}
+              >
+                <img src={char.avatar} alt={char.name} className="w-28 h-28 md:w-40 md:h-40 rounded-full mb-4 object-cover border-4 border-white shadow-md transform group-hover:scale-110 transition-transform" />
                 <h2 className={`text-3xl md:text-4xl font-sketch ${char.nameColor}`}>{char.name}</h2>
+                <p className="font-sketch text-gray-400 mt-2 text-lg">{char.description}</p>
               </div>
             ))}
           </div>
           {difficulty && (
-            <div className="fixed inset-0 bg-white/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+            <div className="fixed inset-0 bg-white/70 backdrop-blur-md z-[100] flex items-center justify-center p-4">
               <div className="bg-white p-8 md:p-12 border-4 border-dashed border-blue-200 rounded-3xl flex flex-col items-center w-full max-w-lg shadow-2xl animate-in zoom-in duration-300">
-                <h2 className="text-3xl md:text-4xl font-sketch mb-8 text-blue-500">Objectif du match ?</h2>
-                <div className="flex gap-4">
+                <h2 className="text-3xl md:text-4xl font-sketch mb-8 text-blue-500 text-center">Objectif du match ?</h2>
+                <div className="flex gap-4 md:gap-6">
                   {[25, 50, 100].map(val => (
-                    <button key={val} onClick={() => startNewGame(difficulty, val)} className="w-16 h-16 md:w-24 md:h-24 rounded-full border-4 border-blue-100 text-2xl md:text-4xl font-sketch text-blue-600 hover:bg-blue-50 transition-all">{val}</button>
+                    <button 
+                      key={val} 
+                      onClick={() => startNewGame(difficulty, val)} 
+                      className="w-16 h-16 md:w-24 md:h-24 rounded-full border-4 border-blue-100 text-2xl md:text-4xl font-sketch text-blue-600 hover:bg-blue-50 transition-all flex items-center justify-center"
+                    >
+                      {val}
+                    </button>
                   ))}
                 </div>
-                <button onClick={() => setDifficulty(null)} className="mt-8 text-gray-400 font-sketch text-xl underline">Retour</button>
+                <button onClick={() => setDifficulty(null)} className="mt-8 text-gray-400 font-sketch text-xl underline hover:text-gray-600 transition-colors">Retour au choix</button>
               </div>
             </div>
           )}
