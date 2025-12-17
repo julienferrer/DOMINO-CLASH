@@ -14,6 +14,7 @@ export interface Character {
   personality: string;
   avatar: string;
   color: string;
+  nameColor: string; // Nouvelle propriété pour la couleur du nom
   tileStyle: string;
 }
 

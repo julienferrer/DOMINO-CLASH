@@ -3,12 +3,13 @@ import { Character, Difficulty } from './types';
 
 export const CHARACTERS: Record<Difficulty, Character> = {
   [Difficulty.EASY]: {
-    name: 'Yosu',
+    name: 'uwu',
     difficulty: Difficulty.EASY,
     description: 'Une petite fille calme et mignonne tout en rose.',
     personality: 'Extremely sweet, calm, uses "uwu" and "owo" occasionally. She is peaceful and supportive. Soft-spoken and loves pink.',
     avatar: 'https://api.dicebear.com/9.x/fun-emoji/svg?seed=uwu&backgroundColor=ffb6c1',
     color: 'border-pink-300 shadow-sm bg-pink-50',
+    nameColor: 'text-pink-500',
     tileStyle: 'uwu-style'
   },
   [Difficulty.MEDIUM]: {
@@ -18,6 +19,7 @@ export const CHARACTERS: Record<Difficulty, Character> = {
     personality: 'Aggressive, raging, impatient, arrogant. He acts like a spoiled kid who hates losing. Lots of caps and trash talk.',
     avatar: 'https://api.dicebear.com/9.x/fun-emoji/svg?seed=bomba&backgroundColor=ffdfbf',
     color: 'border-orange-400 shadow-sm bg-white',
+    nameColor: 'text-orange-600',
     tileStyle: 'bomba-style'
   },
   [Difficulty.HARD]: {
@@ -27,6 +29,7 @@ export const CHARACTERS: Record<Difficulty, Character> = {
     personality: 'Sinister, cold, demonic monster. He treats the game like a dark ritual. Creepy, dark, and very strategic.',
     avatar: 'https://api.dicebear.com/9.x/fun-emoji/svg?seed=evil&backgroundColor=d4adfc',
     color: 'border-purple-900 shadow-sm bg-slate-900 text-white',
+    nameColor: 'text-purple-800',
     tileStyle: 'claat-style'
   }
 };
