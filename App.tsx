@@ -18,9 +18,9 @@ const App: React.FC = () => {
   const [roundPoints, setRoundPoints] = useState<{player: number, ai: number} | null>(null);
   const [pendingPlacement, setPendingPlacement] = useState<{tile: Tile, index: number} | null>(null);
   const [aiAnimatingTile, setAiAnimatingTile] = useState<{tile: Tile, position: 'start' | 'end'} | null>(null);
+  const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
   
   const chatEndRef = useRef<HTMLDivElement>(null);
-  const boardRef = useRef<HTMLDivElement>(null);
 
   const character = difficulty ? CHARACTERS[difficulty] : null;
 
@@ -202,14 +202,12 @@ const App: React.FC = () => {
       setGameState(prev => {
         if (!prev || prev.currentPlayer !== 'ai' || prev.isGameOver || showEndReview) return prev;
         
-        // Cas particulier du premier tour si l'IA commence
         if (prev.board.length === 0 && startingTile) {
           const newHand = [...prev.aiHand];
           const idx = newHand.findIndex(t => (t[0] === startingTile[0] && t[1] === startingTile[1]) || (t[0] === startingTile[1] && t[1] === startingTile[0]));
           if (idx === -1) return prev;
           
           const tileToPlay = newHand[idx];
-          // Animation de l'IA
           setAiAnimatingTile({ tile: tileToPlay, position: 'start' });
           
           setTimeout(() => {
@@ -243,7 +241,6 @@ const App: React.FC = () => {
           const wasDrew = drew;
           const finalBoneyard = currentBoneyard;
           
-          // Lancer l'animation
           setAiAnimatingTile({ tile: tileToAnimate, position: posToAnimate });
 
           setTimeout(() => {
@@ -252,11 +249,7 @@ const App: React.FC = () => {
               if (!st) return null;
               const newBoard = [...st.board];
               const newHand = [...st.aiHand];
-              // Si on a pioché entre temps dans le state local de executeAIMove, on doit mettre à jour la main
-              // Mais ici on simplifie en appliquant le résultat calculé
-              const tileIdx = newHand.findIndex(t => t[0] === tileToAnimate[0] && t[1] === tileToAnimate[1]);
               
-              // Gestion sécurisée si pioché
               let effectiveHand = drew ? currentHand : newHand;
               const effectiveIdx = effectiveHand.findIndex(t => t[0] === tileToAnimate[0] && t[1] === tileToAnimate[1]);
               effectiveHand.splice(effectiveIdx, 1);
@@ -299,32 +292,34 @@ const App: React.FC = () => {
     if (!gameState || gameState.board.length === 0) return 1;
     const tileWidth = 66; 
     const totalWidth = gameState.board.length * tileWidth;
-    const availableWidth = (window.innerWidth - 450) * 0.9; 
+    // Sur mobile, on utilise toute la largeur. Sur PC, on soustrait la largeur du chat (450px environ).
+    const chatWidth = window.innerWidth >= 768 ? 450 : 0;
+    const availableWidth = (window.innerWidth - chatWidth) * 0.95; 
     if (totalWidth < availableWidth) return 1;
-    return Math.max(0.12, availableWidth / totalWidth);
+    return Math.max(0.1, availableWidth / totalWidth);
   }, [gameState?.board.length]);
 
   if (!difficulty || !selectedTargetScore) {
     return (
-      <div className="min-h-screen paper-grid flex flex-col items-center justify-center p-6 overflow-hidden relative">
+      <div className="min-h-screen paper-grid flex flex-col items-center justify-center p-6 overflow-y-auto relative">
         <div className="z-10 text-center flex flex-col items-center">
-          <h1 className="text-6xl md:text-8xl font-sketch text-blue-600 mb-2 transform -rotate-2">DOMINO CLASH</h1>
-          <p className="text-xl md:text-2xl font-sketch text-gray-400 mb-8 italic">"Le duel sur papier blanc."</p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl">
+          <h1 className="text-5xl md:text-8xl font-sketch text-blue-600 mb-2 transform -rotate-2">DOMINO CLASH</h1>
+          <p className="text-lg md:text-2xl font-sketch text-gray-400 mb-8 italic">"Le duel sur papier blanc."</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 w-full max-w-6xl">
             {(Object.values(CHARACTERS) as Character[]).map((char) => (
-              <div key={char.difficulty} className="group bg-white border-4 border-dashed border-gray-100 rounded-3xl p-6 flex flex-col items-center transition-all duration-300 hover:rotate-1 cursor-pointer shadow-lg hover:shadow-2xl" onClick={() => setDifficulty(char.difficulty)}>
-                <img src={char.avatar} alt={char.name} className="w-40 h-40 rounded-full mb-4 object-cover border-4 border-white shadow-md transform group-hover:scale-110 transition-transform" />
-                <h2 className={`text-4xl font-sketch ${char.nameColor}`}>{char.name}</h2>
+              <div key={char.difficulty} className="group bg-white border-4 border-dashed border-gray-100 rounded-3xl p-4 md:p-6 flex flex-col items-center transition-all duration-300 hover:rotate-1 cursor-pointer shadow-lg hover:shadow-2xl" onClick={() => setDifficulty(char.difficulty)}>
+                <img src={char.avatar} alt={char.name} className="w-24 h-24 md:w-40 md:h-40 rounded-full mb-4 object-cover border-4 border-white shadow-md transform group-hover:scale-110 transition-transform" />
+                <h2 className={`text-3xl md:text-4xl font-sketch ${char.nameColor}`}>{char.name}</h2>
               </div>
             ))}
           </div>
           {difficulty && (
-            <div className="fixed inset-0 bg-white/60 backdrop-blur-md z-50 flex items-center justify-center">
-              <div className="bg-white p-12 border-4 border-dashed border-blue-200 rounded-3xl flex flex-col items-center max-w-lg shadow-2xl animate-in zoom-in duration-300">
-                <h2 className="text-4xl font-sketch mb-8 text-blue-500">Objectif du match ?</h2>
+            <div className="fixed inset-0 bg-white/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+              <div className="bg-white p-8 md:p-12 border-4 border-dashed border-blue-200 rounded-3xl flex flex-col items-center w-full max-w-lg shadow-2xl animate-in zoom-in duration-300">
+                <h2 className="text-3xl md:text-4xl font-sketch mb-8 text-blue-500">Objectif du match ?</h2>
                 <div className="flex gap-4">
                   {[25, 50, 100].map(val => (
-                    <button key={val} onClick={() => startNewGame(difficulty, val)} className="w-24 h-24 rounded-full border-4 border-blue-100 text-4xl font-sketch text-blue-600 hover:bg-blue-50 transition-all">{val}</button>
+                    <button key={val} onClick={() => startNewGame(difficulty, val)} className="w-16 h-16 md:w-24 md:h-24 rounded-full border-4 border-blue-100 text-2xl md:text-4xl font-sketch text-blue-600 hover:bg-blue-50 transition-all">{val}</button>
                   ))}
                 </div>
                 <button onClick={() => setDifficulty(null)} className="mt-8 text-gray-400 font-sketch text-xl underline">Retour</button>
@@ -338,38 +333,44 @@ const App: React.FC = () => {
 
   return (
     <div className="h-screen paper-grid flex flex-col overflow-hidden relative">
-      <div className="glass-hud p-4 flex justify-between items-center z-50 shadow-sm border-b border-gray-100">
-        <button onClick={() => { setDifficulty(null); setSelectedTargetScore(null); }} className="font-sketch text-xl text-red-500 hover:text-red-400 transition-colors">← QUITTER</button>
-        <div className="flex gap-8 font-sketch text-2xl text-gray-800">
-          <p>Toi: <span className="font-bold text-blue-600">{gameState?.playerScore}</span></p>
-          <p><span className={character.nameColor}>{character.name}</span>: <span className="font-bold text-orange-500">{gameState?.aiScore}</span></p>
-          <p className="text-gray-300">/ {gameState?.targetScore}</p>
+      <div className="glass-hud p-3 md:p-4 flex justify-between items-center z-[60] shadow-sm border-b border-gray-100">
+        <button onClick={() => { setDifficulty(null); setSelectedTargetScore(null); }} className="font-sketch text-lg md:text-xl text-red-500 hover:text-red-400 transition-colors">← QUITTER</button>
+        <div className="flex gap-4 md:gap-8 font-sketch text-lg md:text-2xl text-gray-800">
+          <p className="whitespace-nowrap">Toi: <span className="font-bold text-blue-600">{gameState?.playerScore}</span></p>
+          <p className="whitespace-nowrap"><span className={character.nameColor}>{character.name}</span>: <span className="font-bold text-orange-500">{gameState?.aiScore}</span></p>
+          <p className="text-gray-300 hidden md:block">/ {gameState?.targetScore}</p>
         </div>
+        {/* Bouton Chat Mobile */}
+        <button 
+          onClick={() => setIsMobileChatOpen(!isMobileChatOpen)}
+          className="md:hidden w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center shadow-lg active:scale-90 transition-transform"
+        >
+          {isMobileChatOpen ? '✕' : '💬'}
+        </button>
       </div>
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative">
         <div className="flex-1 relative flex flex-col overflow-hidden">
-          {/* Main de l'IA face cachée - TOTALEMENT OPAQUE */}
-          <div className="pt-4 pb-2 flex justify-center gap-1">
+          {/* Main de l'IA */}
+          <div className="pt-2 md:pt-4 pb-1 md:pb-2 flex justify-center gap-1">
             {gameState?.aiHand.map((tile, i) => (
               <DominoTile 
                 key={`ai-${i}`} 
                 tile={tile} 
                 vertical 
                 backside={!showEndReview} 
-                className={`scale-75 origin-top border-blue-100 opacity-100 shadow-sm transition-all duration-500 ${showEndReview ? 'rotate-0' : ''}`} 
+                className={`scale-[0.6] md:scale-75 origin-top border-blue-100 opacity-100 shadow-sm transition-all duration-500`} 
                 themeClass={character.tileStyle} 
               />
             ))}
           </div>
 
-          <div className="flex-1 flex items-center justify-center overflow-hidden">
+          <div className="flex-1 flex items-center justify-center overflow-hidden p-4">
             <div 
               id="board-container" 
               className="flex flex-nowrap items-center justify-center gap-0 min-w-max relative"
               style={{ transform: `scale(${boardScale})` }}
             >
-              {/* Animation du domino de l'IA qui arrive */}
               {aiAnimatingTile && (
                 <div className={`absolute ${aiAnimatingTile.position === 'start' ? '-left-20' : '-right-20'} top-0 ai-play-anim`}>
                   <DominoTile 
@@ -395,75 +396,89 @@ const App: React.FC = () => {
           </div>
 
           {pendingPlacement && (
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[100] bg-white p-10 rounded-[40px] border-4 border-dashed border-blue-200 shadow-2xl flex flex-col items-center">
-              <p className="font-sketch text-3xl mb-8 text-blue-600">Où poser ton domino ?</p>
-              <div className="flex gap-8">
-                <button onClick={() => applyPlacement(pendingPlacement.tile, pendingPlacement.index, 'start')} className="px-10 py-5 bg-blue-500 text-white rounded-2xl font-sketch text-2xl border-b-8 border-blue-700 hover:bg-blue-400 transition-colors">GAUCHE</button>
-                <button onClick={() => applyPlacement(pendingPlacement.tile, pendingPlacement.index, 'end')} className="px-10 py-5 bg-blue-500 text-white rounded-2xl font-sketch text-2xl border-b-8 border-blue-700 hover:bg-blue-400 transition-colors">DROITE</button>
+            <div className="absolute inset-0 z-[100] bg-white/40 backdrop-blur-sm flex items-center justify-center p-4">
+              <div className="bg-white p-6 md:p-10 rounded-[30px] md:rounded-[40px] border-4 border-dashed border-blue-200 shadow-2xl flex flex-col items-center w-full max-w-sm">
+                <p className="font-sketch text-2xl md:text-3xl mb-8 text-blue-600">Où poser ton domino ?</p>
+                <div className="flex gap-4 md:gap-8 w-full">
+                  <button onClick={() => applyPlacement(pendingPlacement.tile, pendingPlacement.index, 'start')} className="flex-1 py-4 bg-blue-500 text-white rounded-2xl font-sketch text-xl md:text-2xl border-b-4 md:border-b-8 border-blue-700 active:translate-y-1 transition-all">GAUCHE</button>
+                  <button onClick={() => applyPlacement(pendingPlacement.tile, pendingPlacement.index, 'end')} className="flex-1 py-4 bg-blue-500 text-white rounded-2xl font-sketch text-xl md:text-2xl border-b-4 md:border-b-8 border-blue-700 active:translate-y-1 transition-all">DROITE</button>
+                </div>
               </div>
             </div>
           )}
 
-          <div className="bg-white/40 p-6 border-t border-gray-100 z-50 backdrop-blur-md">
-            <div className="flex justify-between items-start mb-6 max-w-6xl mx-auto">
-              <div className="flex gap-4 items-center">
-                 <button onClick={handleDraw} disabled={!gameState || (getValidMoves(gameState.playerHand, gameState.board).length > 0) || gameState.boneyard.length === 0 || showEndReview} className={`w-20 h-20 bg-white rounded-2xl border-2 border-blue-200 flex flex-col items-center justify-center transition-all shadow-sm ${gameState && getValidMoves(gameState.playerHand, gameState.board).length === 0 && gameState.boneyard.length > 0 && !showEndReview ? 'pulse-draw' : 'opacity-20'}`}>
-                   <span className="text-2xl font-bold text-blue-600">{gameState?.boneyard.length}</span>
-                   <span className="font-sketch text-blue-300 text-xs uppercase tracking-widest">Pioche</span>
+          <div className="bg-white/40 p-4 md:p-6 border-t border-gray-100 z-50 backdrop-blur-md">
+            <div className="flex justify-between items-center mb-4 md:mb-6 max-w-6xl mx-auto gap-4">
+              <div className="flex gap-2 md:gap-4 items-center">
+                 <button onClick={handleDraw} disabled={!gameState || (getValidMoves(gameState.playerHand, gameState.board).length > 0) || gameState.boneyard.length === 0 || showEndReview} className={`w-14 h-14 md:w-20 md:h-20 bg-white rounded-xl md:rounded-2xl border-2 border-blue-200 flex flex-col items-center justify-center transition-all shadow-sm ${gameState && getValidMoves(gameState.playerHand, gameState.board).length === 0 && gameState.boneyard.length > 0 && !showEndReview ? 'pulse-draw' : 'opacity-20'}`}>
+                   <span className="text-xl md:text-2xl font-bold text-blue-600">{gameState?.boneyard.length}</span>
+                   <span className="font-sketch text-blue-300 text-[8px] md:text-xs uppercase tracking-widest">Pioche</span>
                  </button>
                  {showEndReview && !gameState?.isGameOver && (
                     isMatchFinished ? (
-                      <button onClick={triggerGameOver} className="px-10 py-5 bg-red-500 text-white rounded-2xl font-sketch text-3xl border-b-8 border-red-700 animate-pulse">TERMINER</button>
+                      <button onClick={triggerGameOver} className="px-6 py-3 md:px-10 md:py-5 bg-red-500 text-white rounded-xl md:rounded-2xl font-sketch text-xl md:text-3xl border-b-4 md:border-b-8 border-red-700 animate-pulse">TERMINER</button>
                     ) : (
-                      <button onClick={handleNextRound} className="px-10 py-5 bg-green-500 text-white rounded-2xl font-sketch text-3xl border-b-8 border-green-700">SUIVANT</button>
+                      <button onClick={handleNextRound} className="px-6 py-3 md:px-10 md:py-5 bg-green-500 text-white rounded-xl md:rounded-2xl font-sketch text-xl md:text-3xl border-b-4 md:border-b-8 border-green-700">SUIVANT</button>
                     )
                  )}
               </div>
-              <div className="text-right flex flex-col items-end min-h-[110px] min-w-[300px] bg-[#1a1a1a] p-4 rounded-xl border-4 border-gray-400 shadow-inner relative">
-                 <div className="absolute top-1 left-4 flex gap-1">
-                    <div className="w-1.5 h-1.5 bg-gray-500 rounded-full"></div>
-                    <div className="w-1.5 h-1.5 bg-gray-500 rounded-full"></div>
-                 </div>
-                 <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Le Narrateur : Tableau Noir</span>
-                 <div className="flex flex-col gap-1 items-end w-full">
+              
+              <div className="flex-1 text-right flex flex-col items-end min-h-[80px] md:min-h-[110px] bg-[#1a1a1a] p-2 md:p-4 rounded-xl border-2 md:border-4 border-gray-400 shadow-inner relative max-w-[200px] md:max-w-[300px]">
+                 <span className="text-[8px] md:text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1 md:mb-2">Le Narrateur</span>
+                 <div className="flex flex-col gap-0.5 md:gap-1 items-end w-full overflow-hidden">
                     {gameState?.actions.map((action, idx) => (
-                      <p key={idx} className={`font-sketch text-xl italic transition-all duration-500 ${idx === gameState.actions.length - 1 ? 'text-white scale-105 opacity-100' : 'text-gray-500 opacity-60 scale-100'}`}>
+                      <p key={idx} className={`font-sketch text-sm md:text-xl italic transition-all duration-500 truncate w-full ${idx === gameState.actions.length - 1 ? 'text-white scale-105 opacity-100' : 'text-gray-500 opacity-60 scale-100'}`}>
                         {action}
                       </p>
                     ))}
                  </div>
               </div>
             </div>
-            <div className="flex justify-center gap-2 overflow-x-auto pt-6 pb-6 scrollbar-hide">
+            
+            <div className="flex justify-start md:justify-center gap-2 overflow-x-auto pt-4 md:pt-6 pb-2 md:pb-6 scrollbar-hide mask-hand">
               {gameState?.playerHand.map((tile, i) => {
                 let playable = getPossiblePlacements(tile, gameState.board).length > 0;
                 if (gameState.board.length === 0 && startingTile) playable = (tile[0] === startingTile[0] && tile[1] === startingTile[1]);
                 const isTurn = gameState.currentPlayer === 'player' && !showEndReview && !gameState.isGameOver;
                 return (
-                  <DominoTile key={i} tile={tile} vertical onClick={() => playTile(i)} disabled={!isTurn || !playable} className={!playable ? 'grayscale opacity-10' : 'tile-dance mx-1'} />
+                  <DominoTile 
+                    key={i} 
+                    tile={tile} 
+                    vertical 
+                    onClick={() => playTile(i)} 
+                    disabled={!isTurn || !playable} 
+                    className={`${!playable ? 'grayscale opacity-10' : 'tile-dance mx-1'} flex-shrink-0 scale-90 md:scale-100`} 
+                  />
                 );
               })}
             </div>
           </div>
         </div>
 
-        <div className="w-80 md:w-96 glass-chat flex flex-col z-50 shadow-xl">
-          <div className="p-6 border-b border-gray-100 flex items-center gap-4">
-            <img src={character.avatar} alt={character.name} className="w-16 h-16 rounded-2xl object-cover border-2 border-white transform -rotate-3 shadow-sm" />
-            <p className={`text-2xl font-sketch ${character.nameColor}`}>{character.name}</p>
+        {/* Chat - Sidebar sur PC, Overlay sur Mobile */}
+        <div className={`
+          ${isMobileChatOpen ? 'flex' : 'hidden md:flex'}
+          fixed md:relative inset-0 md:inset-auto w-full md:w-96 glass-chat flex flex-col z-[100] md:z-50 shadow-xl
+        `}>
+          <div className="p-4 md:p-6 border-b border-gray-100 flex justify-between items-center">
+            <div className="flex items-center gap-4">
+              <img src={character.avatar} alt={character.name} className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl object-cover border-2 border-white transform -rotate-3 shadow-sm" />
+              <p className={`text-xl md:text-2xl font-sketch ${character.nameColor}`}>{character.name}</p>
+            </div>
+            <button onClick={() => setIsMobileChatOpen(false)} className="md:hidden p-2 text-gray-400">✕</button>
           </div>
-          <div className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-hide">
+          <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 scrollbar-hide">
             {chatMessages.map((msg, i) => (
               <div key={i} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-                <div className={`max-w-[90%] px-4 py-3 font-sketch text-xl border border-gray-100 shadow-sm ${msg.role === 'user' ? 'bg-blue-500 text-white rounded-2xl rounded-tr-none' : 'bg-gray-50 text-gray-800 rounded-2xl rounded-tl-none transform rotate-1'}`}>{msg.text}</div>
+                <div className={`max-w-[90%] px-4 py-2 md:py-3 font-sketch text-lg md:text-xl border border-gray-100 shadow-sm ${msg.role === 'user' ? 'bg-blue-500 text-white rounded-2xl rounded-tr-none' : 'bg-gray-50 text-gray-800 rounded-2xl rounded-tl-none transform rotate-1'}`}>{msg.text}</div>
               </div>
             ))}
             {isTyping && <div className="animate-pulse font-sketch text-blue-400">Écrit...</div>}
             <div ref={chatEndRef} />
           </div>
-          <form onSubmit={(e) => { e.preventDefault(); handleChat(userInput); }} className="p-6 border-t border-gray-100">
+          <form onSubmit={(e) => { e.preventDefault(); handleChat(userInput); }} className="p-4 md:p-6 border-t border-gray-100 bg-white">
             <div className="relative">
-              <input type="text" value={userInput} onChange={(e) => setUserInput(e.target.value)} placeholder="Un message ?" className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 font-sketch text-xl focus:outline-none focus:border-blue-300 placeholder:text-gray-300" />
+              <input type="text" value={userInput} onChange={(e) => setUserInput(e.target.value)} placeholder="Un message ?" className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-2 md:py-3 font-sketch text-lg md:text-xl focus:outline-none focus:border-blue-300 placeholder:text-gray-300" />
               <button type="submit" disabled={!userInput.trim() || isTyping} className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-2 bg-blue-500 text-white rounded-xl font-sketch text-lg hover:bg-blue-600 transition-colors">OK</button>
             </div>
           </form>
@@ -471,13 +486,13 @@ const App: React.FC = () => {
       </div>
 
       {gameState?.isGameOver && (
-        <div className="fixed inset-0 bg-white/95 flex flex-col items-center justify-center z-[200] animate-in fade-in duration-500 paper-grid">
-             <div className="bg-white p-16 rounded-[50px] border-4 border-dashed border-blue-200 shadow-2xl text-center">
-               <h2 className={`text-8xl font-sketch mb-8 ${gameState.winner === 'player' ? 'text-green-500' : 'text-red-500'} animate-bounce`}>
+        <div className="fixed inset-0 bg-white/95 flex flex-col items-center justify-center z-[200] animate-in fade-in duration-500 paper-grid p-4">
+             <div className="bg-white p-8 md:p-16 rounded-[40px] md:rounded-[50px] border-4 border-dashed border-blue-200 shadow-2xl text-center w-full max-w-lg">
+               <h2 className={`text-5xl md:text-8xl font-sketch mb-4 md:mb-8 ${gameState.winner === 'player' ? 'text-green-500' : 'text-red-500'} animate-bounce`}>
                  {gameState.winner === 'player' ? 'VICTOIRE !' : 'DÉFAITE !'}
                </h2>
-               <p className="font-sketch text-4xl mb-12 text-gray-600">{gameState.playerScore} - {gameState.aiScore}</p>
-               <button onClick={() => { setDifficulty(null); setSelectedTargetScore(null); }} className="px-12 py-6 bg-blue-500 text-white font-sketch text-4xl rounded-3xl shadow-xl border-b-8 border-blue-700 hover:bg-blue-400 transition-all">RECOMMENCER</button>
+               <p className="font-sketch text-2xl md:text-4xl mb-8 md:mb-12 text-gray-600">{gameState.playerScore} - {gameState.aiScore}</p>
+               <button onClick={() => { setDifficulty(null); setSelectedTargetScore(null); }} className="w-full md:w-auto px-8 py-4 md:px-12 md:py-6 bg-blue-500 text-white font-sketch text-2xl md:text-4xl rounded-2xl md:rounded-3xl shadow-xl border-b-4 md:border-b-8 border-blue-700 hover:bg-blue-400 transition-all">RECOMMENCER</button>
              </div>
         </div>
       )}
