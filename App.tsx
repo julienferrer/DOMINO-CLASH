@@ -300,24 +300,25 @@ const App: React.FC = () => {
 
   if (!difficulty || !selectedTargetScore) {
     return (
-      <div className="min-h-screen paper-grid flex flex-col items-center justify-start md:justify-center p-4 md:p-12 overflow-y-auto relative scrollbar-hide">
-        <div className="z-10 text-center flex flex-col items-center w-full max-w-6xl py-4 md:py-8">
-          <h1 className="text-4xl md:text-8xl font-sketch text-blue-600 mb-1 transform -rotate-2">DOMINO CLASH</h1>
-          <p className="text-base md:text-2xl font-sketch text-gray-400 mb-6 md:mb-12 italic">"Le duel sur papier blanc."</p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-10 w-full mb-8">
+      <div className="min-h-screen paper-grid flex flex-col items-center justify-start md:justify-center p-3 md:p-12 overflow-y-auto relative scrollbar-hide">
+        <div className="z-10 text-center flex flex-col items-center w-full max-w-6xl py-2 md:py-8">
+          <h1 className="text-3xl md:text-8xl font-sketch text-blue-600 mb-0 md:mb-1 transform -rotate-1 md:-rotate-2">DOMINO CLASH</h1>
+          <p className="text-sm md:text-2xl font-sketch text-gray-400 mb-4 md:mb-12 italic">"Le duel sur papier blanc."</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-10 w-full mb-6">
             {(Object.values(CHARACTERS) as Character[]).map((char) => (
               <div 
                 key={char.difficulty} 
-                className={`group bg-white border-4 border-dashed rounded-3xl p-4 md:p-6 flex flex-col items-center transition-all duration-300 hover:rotate-1 cursor-pointer shadow-lg hover:shadow-2xl active:scale-95 ${char.difficulty === Difficulty.HARD ? 'border-purple-200' : 'border-gray-100'}`} 
+                className={`group bg-white border-2 md:border-4 border-dashed rounded-2xl md:rounded-3xl p-3 md:p-6 flex flex-col items-center transition-all duration-300 hover:rotate-1 cursor-pointer shadow-md md:shadow-lg hover:shadow-2xl active:scale-95 ${char.difficulty === Difficulty.HARD ? 'border-purple-200 bg-purple-50/10' : 'border-gray-100'}`} 
                 onClick={() => setDifficulty(char.difficulty)}
               >
                 <div className="relative">
-                  <img src={char.avatar} alt={char.name} className="w-24 h-24 md:w-40 md:h-40 rounded-full mb-3 md:mb-4 object-cover border-4 border-white shadow-md transform group-hover:scale-110 transition-transform" />
-                  {char.difficulty === Difficulty.HARD && <div className="absolute -top-2 -right-2 bg-purple-600 text-white text-[10px] font-bold px-2 py-1 rounded-full animate-pulse uppercase tracking-tighter">BOSS</div>}
+                  <img src={char.avatar} alt={char.name} className="w-16 h-16 md:w-40 md:h-40 rounded-full mb-2 md:mb-4 object-cover border-2 md:border-4 border-white shadow-sm md:shadow-md transform group-hover:scale-105 md:group-hover:scale-110 transition-transform" />
+                  {char.difficulty === Difficulty.HARD && <div className="absolute -top-1 -right-1 bg-purple-600 text-white text-[8px] md:text-[10px] font-bold px-1.5 py-0.5 rounded-full animate-pulse uppercase tracking-tighter">BOSS</div>}
                 </div>
-                <h2 className={`text-2xl md:text-4xl font-sketch ${char.nameColor}`}>{char.name}</h2>
-                <p className="font-sketch text-gray-400 mt-1 md:mt-2 text-base md:text-lg text-center leading-tight">{char.description}</p>
-                <span className={`mt-2 text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded border ${char.difficulty === Difficulty.HARD ? 'border-purple-200 text-purple-400' : 'border-gray-200 text-gray-300'}`}>
+                <h2 className={`text-xl md:text-4xl font-sketch ${char.nameColor}`}>{char.name}</h2>
+                <p className="font-sketch text-gray-400 mt-0.5 md:mt-2 text-xs md:text-lg text-center leading-tight md:block hidden">{char.description}</p>
+                <p className="font-sketch text-gray-400 mt-0.5 text-[10px] md:hidden text-center leading-tight">{char.description}</p>
+                <span className={`mt-1 md:mt-2 text-[8px] md:text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded border ${char.difficulty === Difficulty.HARD ? 'border-purple-200 text-purple-400' : 'border-gray-200 text-gray-300'}`}>
                   {char.difficulty}
                 </span>
               </div>
@@ -373,13 +374,13 @@ const App: React.FC = () => {
                 tile={tile} 
                 vertical 
                 backside={!showEndReview} 
-                className={`scale-[0.6] md:scale-75 origin-top border-blue-100 opacity-100 shadow-sm transition-all duration-500`} 
+                className={`scale-[0.5] md:scale-75 origin-top border-blue-100 opacity-100 shadow-sm transition-all duration-500`} 
                 themeClass={character.tileStyle} 
               />
             ))}
           </div>
 
-          <div className="flex-1 flex items-center justify-center overflow-hidden p-4">
+          <div className="flex-1 flex items-center justify-center overflow-hidden p-2 md:p-4">
             <div 
               id="board-container" 
               className="flex flex-nowrap items-center justify-center gap-0 min-w-max relative"
@@ -421,27 +422,27 @@ const App: React.FC = () => {
             </div>
           )}
 
-          <div className="bg-white/40 p-4 md:p-6 border-t border-gray-100 z-50 backdrop-blur-md">
-            <div className="flex justify-between items-center mb-4 md:mb-6 max-w-6xl mx-auto gap-4">
+          <div className="bg-white/40 p-3 md:p-6 border-t border-gray-100 z-50 backdrop-blur-md">
+            <div className="flex justify-between items-center mb-2 md:mb-6 max-w-6xl mx-auto gap-4">
               <div className="flex gap-2 md:gap-4 items-center">
-                 <button onClick={handleDraw} disabled={!gameState || (getValidMoves(gameState.playerHand, gameState.board).length > 0) || gameState.boneyard.length === 0 || showEndReview} className={`w-14 h-14 md:w-20 md:h-20 bg-white rounded-xl md:rounded-2xl border-2 border-blue-200 flex flex-col items-center justify-center transition-all shadow-sm ${gameState && getValidMoves(gameState.playerHand, gameState.board).length === 0 && gameState.boneyard.length > 0 && !showEndReview ? 'pulse-draw' : 'opacity-20'}`}>
-                   <span className="text-xl md:text-2xl font-bold text-blue-600">{gameState?.boneyard.length}</span>
-                   <span className="font-sketch text-blue-300 text-[8px] md:text-xs uppercase tracking-widest">Pioche</span>
+                 <button onClick={handleDraw} disabled={!gameState || (getValidMoves(gameState.playerHand, gameState.board).length > 0) || gameState.boneyard.length === 0 || showEndReview} className={`w-12 h-12 md:w-20 md:h-20 bg-white rounded-xl md:rounded-2xl border-2 border-blue-200 flex flex-col items-center justify-center transition-all shadow-sm ${gameState && getValidMoves(gameState.playerHand, gameState.board).length === 0 && gameState.boneyard.length > 0 && !showEndReview ? 'pulse-draw' : 'opacity-20'}`}>
+                   <span className="text-lg md:text-2xl font-bold text-blue-600">{gameState?.boneyard.length}</span>
+                   <span className="font-sketch text-blue-300 text-[6px] md:text-xs uppercase tracking-widest">Pioche</span>
                  </button>
                  {showEndReview && !gameState?.isGameOver && (
                     isMatchFinished ? (
-                      <button onClick={triggerGameOver} className="px-6 py-3 md:px-10 md:py-5 bg-red-500 text-white rounded-xl md:rounded-2xl font-sketch text-xl md:text-3xl border-b-4 md:border-b-8 border-red-700 animate-pulse">TERMINER</button>
+                      <button onClick={triggerGameOver} className="px-4 py-2 md:px-10 md:py-5 bg-red-500 text-white rounded-xl md:rounded-2xl font-sketch text-lg md:text-3xl border-b-4 md:border-b-8 border-red-700 animate-pulse">TERMINER</button>
                     ) : (
-                      <button onClick={handleNextRound} className="px-6 py-3 md:px-10 md:py-5 bg-green-500 text-white rounded-xl md:rounded-2xl font-sketch text-xl md:text-3xl border-b-4 md:border-b-8 border-green-700">SUIVANT</button>
+                      <button onClick={handleNextRound} className="px-4 py-2 md:px-10 md:py-5 bg-green-500 text-white rounded-xl md:rounded-2xl font-sketch text-lg md:text-3xl border-b-4 md:border-b-8 border-green-700">SUIVANT</button>
                     )
                  )}
               </div>
               
-              <div className="flex-1 text-right flex flex-col items-end min-h-[80px] md:min-h-[110px] bg-[#1a1a1a] p-2 md:p-4 rounded-xl border-2 md:border-4 border-gray-400 shadow-inner relative max-w-[200px] md:max-w-[300px]">
-                 <span className="text-[8px] md:text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1 md:mb-2">Le Narrateur</span>
+              <div className="flex-1 text-right flex flex-col items-end min-h-[60px] md:min-h-[110px] bg-[#1a1a1a] p-2 md:p-4 rounded-xl border-2 md:border-4 border-gray-400 shadow-inner relative max-w-[150px] md:max-w-[300px]">
+                 <span className="text-[6px] md:text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-0.5 md:mb-2">Narrateur</span>
                  <div className="flex flex-col gap-0.5 md:gap-1 items-end w-full overflow-hidden">
                     {gameState?.actions.map((action, idx) => (
-                      <p key={idx} className={`font-sketch text-sm md:text-xl italic transition-all duration-500 truncate w-full ${idx === gameState.actions.length - 1 ? 'text-white scale-105 opacity-100' : 'text-gray-500 opacity-60 scale-100'}`}>
+                      <p key={idx} className={`font-sketch text-[10px] md:text-xl italic transition-all duration-500 truncate w-full ${idx === gameState.actions.length - 1 ? 'text-white scale-105 opacity-100' : 'text-gray-500 opacity-60 scale-100'}`}>
                         {action}
                       </p>
                     ))}
@@ -449,7 +450,7 @@ const App: React.FC = () => {
               </div>
             </div>
             
-            <div className="flex justify-start md:justify-center gap-2 overflow-x-auto pt-4 md:pt-6 pb-2 md:pb-6 scrollbar-hide mask-hand">
+            <div className="flex justify-start md:justify-center gap-1 md:gap-2 overflow-x-auto pt-2 md:pt-6 pb-1 md:pb-6 scrollbar-hide mask-hand">
               {gameState?.playerHand.map((tile, i) => {
                 let playable = getPossiblePlacements(tile, gameState.board).length > 0;
                 if (gameState.board.length === 0 && startingTile) playable = (tile[0] === startingTile[0] && tile[1] === startingTile[1]);
@@ -461,7 +462,7 @@ const App: React.FC = () => {
                     vertical 
                     onClick={() => playTile(i)} 
                     disabled={!isTurn || !playable} 
-                    className={`${!playable ? 'grayscale opacity-10' : 'tile-dance mx-1'} flex-shrink-0 scale-90 md:scale-100`} 
+                    className={`${!playable ? 'grayscale opacity-10' : 'tile-dance mx-0.5'} flex-shrink-0 scale-75 md:scale-100`} 
                   />
                 );
               })}
@@ -475,15 +476,15 @@ const App: React.FC = () => {
         `}>
           <div className="p-4 md:p-6 border-b border-gray-100 flex justify-between items-center">
             <div className="flex items-center gap-4">
-              <img src={character.avatar} alt={character.name} className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl object-cover border-2 border-white transform -rotate-3 shadow-sm" />
-              <p className={`text-xl md:text-2xl font-sketch ${character.nameColor}`}>{character.name}</p>
+              <img src={character.avatar} alt={character.name} className="w-10 h-10 md:w-16 md:h-16 rounded-xl md:rounded-2xl object-cover border-2 border-white transform -rotate-3 shadow-sm" />
+              <p className={`text-lg md:text-2xl font-sketch ${character.nameColor}`}>{character.name}</p>
             </div>
             <button onClick={() => setIsMobileChatOpen(false)} className="md:hidden p-2 text-gray-400">✕</button>
           </div>
           <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 scrollbar-hide">
             {chatMessages.map((msg, i) => (
               <div key={i} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-                <div className={`max-w-[90%] px-4 py-2 md:py-3 font-sketch text-lg md:text-xl border border-gray-100 shadow-sm ${msg.role === 'user' ? 'bg-blue-500 text-white rounded-2xl rounded-tr-none' : 'bg-gray-50 text-gray-800 rounded-2xl rounded-tl-none transform rotate-1'}`}>{msg.text}</div>
+                <div className={`max-w-[90%] px-3 py-1.5 md:py-3 font-sketch text-base md:text-xl border border-gray-100 shadow-sm ${msg.role === 'user' ? 'bg-blue-500 text-white rounded-2xl rounded-tr-none' : 'bg-gray-50 text-gray-800 rounded-2xl rounded-tl-none transform rotate-1'}`}>{msg.text}</div>
               </div>
             ))}
             {isTyping && <div className="animate-pulse font-sketch text-blue-400">Écrit...</div>}
@@ -491,8 +492,8 @@ const App: React.FC = () => {
           </div>
           <form onSubmit={(e) => { e.preventDefault(); handleChat(userInput); }} className="p-4 md:p-6 border-t border-gray-100 bg-white">
             <div className="relative">
-              <input type="text" value={userInput} onChange={(e) => setUserInput(e.target.value)} placeholder="Un message ?" className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-2 md:py-3 font-sketch text-lg md:text-xl focus:outline-none focus:border-blue-300 placeholder:text-gray-300" />
-              <button type="submit" disabled={!userInput.trim() || isTyping} className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-2 bg-blue-500 text-white rounded-xl font-sketch text-lg hover:bg-blue-600 transition-colors">OK</button>
+              <input type="text" value={userInput} onChange={(e) => setUserInput(e.target.value)} placeholder="Un message ?" className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-3 py-2 md:py-3 font-sketch text-base md:text-xl focus:outline-none focus:border-blue-300 placeholder:text-gray-300" />
+              <button type="submit" disabled={!userInput.trim() || isTyping} className="absolute right-1 top-1/2 -translate-y-1/2 px-3 py-1 md:px-4 md:py-2 bg-blue-500 text-white rounded-xl font-sketch text-base md:text-lg hover:bg-blue-600 transition-colors">OK</button>
             </div>
           </form>
         </div>
@@ -500,12 +501,12 @@ const App: React.FC = () => {
 
       {gameState?.isGameOver && (
         <div className="fixed inset-0 bg-white/95 flex flex-col items-center justify-center z-[200] animate-in fade-in duration-500 paper-grid p-4">
-             <div className="bg-white p-8 md:p-16 rounded-[40px] md:rounded-[50px] border-4 border-dashed border-blue-200 shadow-2xl text-center w-full max-w-lg">
-               <h2 className={`text-5xl md:text-8xl font-sketch mb-4 md:mb-8 ${gameState.winner === 'player' ? 'text-green-500' : 'text-red-500'} animate-bounce`}>
+             <div className="bg-white p-6 md:p-16 rounded-[30px] md:rounded-[50px] border-4 border-dashed border-blue-200 shadow-2xl text-center w-full max-w-lg">
+               <h2 className={`text-4xl md:text-8xl font-sketch mb-4 md:mb-8 ${gameState.winner === 'player' ? 'text-green-500' : 'text-red-500'} animate-bounce`}>
                  {gameState.winner === 'player' ? 'VICTOIRE !' : 'DÉFAITE !'}
                </h2>
-               <p className="font-sketch text-2xl md:text-4xl mb-8 md:mb-12 text-gray-600">{gameState.playerScore} - {gameState.aiScore}</p>
-               <button onClick={() => { setDifficulty(null); setSelectedTargetScore(null); }} className="w-full md:w-auto px-8 py-4 md:px-12 md:py-6 bg-blue-500 text-white font-sketch text-2xl md:text-4xl rounded-2xl md:rounded-3xl shadow-xl border-b-4 md:border-b-8 border-blue-700 hover:bg-blue-400 transition-all">RECOMMENCER</button>
+               <p className="font-sketch text-xl md:text-4xl mb-6 md:mb-12 text-gray-600">{gameState.playerScore} - {gameState.aiScore}</p>
+               <button onClick={() => { setDifficulty(null); setSelectedTargetScore(null); }} className="w-full md:w-auto px-6 py-3 md:px-12 md:py-6 bg-blue-500 text-white font-sketch text-xl md:text-4xl rounded-xl md:rounded-3xl shadow-xl border-b-4 md:border-b-8 border-blue-700 hover:bg-blue-400 transition-all">RECOMMENCER</button>
              </div>
         </div>
       )}
