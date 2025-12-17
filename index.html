@@ -53,14 +53,14 @@
       }
 
       @keyframes dance {
-        0%, 100% { transform: scale(1.05) rotate(0deg); }
-        25% { transform: scale(1.05) rotate(-1deg); }
-        75% { transform: scale(1.05) rotate(1deg); }
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        25% { transform: translateY(-4px) rotate(-2deg); }
+        75% { transform: translateY(-4px) rotate(2deg); }
       }
 
       @keyframes highlight {
         from { box-shadow: 0 0 8px 1px rgba(59, 130, 246, 0.1); }
-        to { box-shadow: 0 0 20px 5px rgba(59, 130, 246, 0.3); }
+        to { box-shadow: 0 4px 20px 5px rgba(59, 130, 246, 0.3); }
       }
 
       .scrollbar-hide::-webkit-scrollbar {

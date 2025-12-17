@@ -371,13 +371,14 @@ const App: React.FC = () => {
                  </div>
               </div>
             </div>
-            <div className="flex justify-center gap-2 overflow-x-auto pb-6 scrollbar-hide">
+            {/* Ajout de pt-6 pour éviter que l'animation tile-dance ne coupe les dominos en haut */}
+            <div className="flex justify-center gap-2 overflow-x-auto pt-6 pb-6 scrollbar-hide">
               {gameState?.playerHand.map((tile, i) => {
                 let playable = getPossiblePlacements(tile, gameState.board).length > 0;
                 if (gameState.board.length === 0 && startingTile) playable = (tile[0] === startingTile[0] && tile[1] === startingTile[1]);
                 const isTurn = gameState.currentPlayer === 'player' && !showEndReview && !gameState.isGameOver;
                 return (
-                  <DominoTile key={i} tile={tile} vertical onClick={() => playTile(i)} disabled={!isTurn || !playable} className={!playable ? 'grayscale opacity-10' : 'tile-dance scale-110 mx-1'} />
+                  <DominoTile key={i} tile={tile} vertical onClick={() => playTile(i)} disabled={!isTurn || !playable} className={!playable ? 'grayscale opacity-10' : 'tile-dance mx-1'} />
                 );
               })}
             </div>
