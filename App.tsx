@@ -304,10 +304,17 @@ const App: React.FC = () => {
 
       <div className="flex-1 flex overflow-hidden">
         <div className="flex-1 relative flex flex-col overflow-hidden">
-          {/* Main de l'IA face cachée - TOTALEMENT OPAQUE */}
+          {/* Main de l'IA - Révélée à la fin du round */}
           <div className="pt-4 pb-2 flex justify-center gap-1">
-            {gameState?.aiHand.map((_, i) => (
-              <DominoTile key={`ai-${i}`} vertical backside className="scale-75 origin-top border-blue-100 opacity-100 shadow-sm" themeClass={character.tileStyle} />
+            {gameState?.aiHand.map((tile, i) => (
+              <DominoTile 
+                key={`ai-${i}`} 
+                tile={tile} 
+                vertical 
+                backside={!showEndReview} 
+                className={`scale-75 origin-top border-blue-100 opacity-100 shadow-sm transition-all duration-500 ${showEndReview ? 'rotate-0' : ''}`} 
+                themeClass={character.tileStyle} 
+              />
             ))}
           </div>
 
